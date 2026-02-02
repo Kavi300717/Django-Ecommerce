@@ -31,8 +31,8 @@
 			<figcaption class="info">
 				<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
 				<p class="text-muted small">
-					{% if cart_item.product.size %}Size: {{ cart_item.product.size }}{% endif %}
-					{% if cart_item.product.color %}{% if cart_item.product.size %} | {% endif %}Color: {{ cart_item.product.color }}{% endif %}
+					{% if cart_item.size %}Size: {{ cart_item.size }}{% endif %}
+					{% if cart_item.color %}{% if cart_item.size %} | {% endif %}Color: {{ cart_item.color }}{% endif %}
 				</p>
 			</figcaption>
 		</figure>

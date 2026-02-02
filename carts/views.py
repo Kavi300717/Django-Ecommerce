@@ -14,16 +14,24 @@ def _cart_id(request):
 
 def add_cart(request, product_id):
     product = Product.objects.get(id=product_id)
+    # accept optional size and color from POST (product variants)
+    size = None
+    color = None
+    if request.method == 'POST':
+        size = request.POST.get('size') or None
+        color = request.POST.get('color') or None
+
     try:
-        cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present inn the session
+        cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present in the session
     except Cart.DoesNotExist:
         cart = Cart.objects.create(
             cart_id = _cart_id(request)
         )
     cart.save()
-    
+
+    # group cart items by product + size + color so variants are separate items
     try:
-        cart_item = CartItem.objects.get(product=product, cart=cart)
+        cart_item = CartItem.objects.get(product=product, cart=cart, size=size, color=color)
         cart_item.quantity += 1
         cart_item.save()
     except CartItem.DoesNotExist:
@@ -31,6 +39,8 @@ def add_cart(request, product_id):
             product = product,
             quantity = 1,
             cart = cart,
+            size = size,
+            color = color,
         )
         cart_item.save()
     return redirect('cart')
@@ -88,6 +98,10 @@ def increment_cart(request, cart_item_id):
         cart_item.save()
     except CartItem.DoesNotExist:
         pass
+    # redirect back to `next` if provided, otherwise to cart
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
     return redirect('cart')
 
 
@@ -101,4 +115,8 @@ def decrement_cart(request, cart_item_id):
             cart_item.delete()
     except CartItem.DoesNotExist:
         pass
+    # redirect back to `next` if provided, otherwise to cart
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
     return redirect('cart')

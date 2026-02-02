@@ -71,7 +71,19 @@
 	{% if single_product.stock <= 0 %}
 	<h5 class="text-danger">Out Of Stock</h5>
 	{% else %}
-	<a href="{% url 'add_cart' single_product.id %}" class="btn  btn-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </a>
+	{% if cart_item %}
+		<div class="btn-group" role="group" aria-label="Cart controls">
+			<a href="{% url 'decrement_cart' cart_item.id %}?next={{ request.path }}" class="btn btn-light"> <i class="fa fa-minus"></i> </a>
+			<span class="btn btn-outline-secondary">{{ cart_item.quantity }}</span>
+			<a href="{% url 'increment_cart' cart_item.id %}?next={{ request.path }}" class="btn btn-light"> <i class="fa fa-plus"></i> </a>
+			<a href="{% url 'cart' %}" class="btn btn-success ml-2"> View Cart </a>
+		</div>
+	{% else %}
+		<form method="post" action="{% url 'add_cart' single_product.id %}">
+			{% csrf_token %}
+			<button type="submit" class="btn  btn-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
+		</form>
+	{% endif %}
 	{% endif %}
 </article> <!-- product-info-aside .// -->
 		</main> <!-- col.// -->
