@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from store.models import Product
 from .models import Cart, CartItem
 from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
@@ -32,9 +33,72 @@ def add_cart(request, product_id):
             cart = cart,
         )
         cart_item.save()
-    return HttpResponse(cart_item.quantity)
-    exit()
     return redirect('cart')
 
-def cart(request):
-    return render(request, 'store/cart.html')
+def cart(request, total=0, quantity=0, cart_items=None):
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        for cart_item in cart_items:
+            total += (cart_item.product.price * cart_item.quantity)
+            quantity += cart_item.quantity
+    except ObjectDoesNotExist:
+        pass
+    # ensure cart_items is iterable and detect empty cart
+    if not cart_items:
+        cart_items = []
+        cart_is_empty = True
+    else:
+        cart_is_empty = False
+
+    tax = (2 * total) / 100
+    grand_total = total + tax
+
+    context = {
+        'total': total,
+        'quantity': quantity,
+        'cart_items': cart_items,
+        'tax': tax,
+        'grand_total': grand_total,
+        'cart_is_empty': cart_is_empty,
+    }
+
+    return render(request, 'store/cart.html', context)
+
+def remove_cart(request, cart_item_id):
+    cart_item = CartItem.objects.get(id=cart_item_id)
+    cart_item.delete()
+    return redirect('cart')
+
+def checkout(request):
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        if not cart_items:
+            return redirect('cart')
+    except ObjectDoesNotExist:
+        return redirect('cart')
+
+    return render(request, 'store/checkout.html')
+
+def increment_cart(request, cart_item_id):
+    try:
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        cart_item.quantity += 1
+        cart_item.save()
+    except CartItem.DoesNotExist:
+        pass
+    return redirect('cart')
+
+
+def decrement_cart(request, cart_item_id):
+    try:
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+    except CartItem.DoesNotExist:
+        pass
+    return redirect('cart')
