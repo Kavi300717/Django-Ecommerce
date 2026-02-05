@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from store.models import Product
+from store.models import Product, Variation
 from .models import Cart, CartItem
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -34,6 +34,7 @@ def add_cart(request, product_id):
         cart_item = CartItem.objects.get(product=product, cart=cart, size=size, color=color)
         cart_item.quantity += 1
         cart_item.save()
+        print(f"✓ Updated Cart: {product.product_name} | Color: {color or 'N/A'} | Size: {size or 'N/A'} | Quantity: {cart_item.quantity}")
     except CartItem.DoesNotExist:
         cart_item = CartItem.objects.create(
             product = product,
@@ -43,6 +44,7 @@ def add_cart(request, product_id):
             color = color,
         )
         cart_item.save()
+        print(f"✓ Added to Cart: {product.product_name} | Color: {color or 'N/A'} | Size: {size or 'N/A'} | Quantity: 1")
     return redirect('cart')
 
 def cart(request, total=0, quantity=0, cart_items=None):

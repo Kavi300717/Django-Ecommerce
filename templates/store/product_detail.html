@@ -30,15 +30,21 @@
 					
 					
 					<hr>
+	<form method="post" action="{% url 'add_cart' single_product.id %}">
+		{% csrf_token %}
 					<div class="row">
 						<div class="item-option-select">
 							<h6>Choose Color</h6>
 							<select class="form-control" name="color" id="color_select">
-								<option value="">-- Select Color --</option>
-								<option value="Silver">Silver</option>
-								<option value="Gray">Gray</option>
-								<option value="Gold" selected>Gold</option>
-								<option value="Black">Black</option>
+								{% for color in colors %}
+									{% if forloop.first %}
+										<option value="{{ color }}" selected>{{ color }}</option>
+									{% else %}
+										<option value="{{ color }}">{{ color }}</option>
+									{% endif %}
+								{% empty %}
+									<option value="">No colors available</option>
+								{% endfor %}
 							</select>
 						</div>
 					</div> <!-- row.// -->
@@ -46,11 +52,15 @@
 	<div class="item-option-select">
 		<h6>Select Size</h6>
 		<select class="form-control" name="size" id="size_select">
-			<option value="">-- Select Size --</option>
-			<option value="S">S</option>
-			<option value="M" selected>M</option>
-			<option value="L">L</option>
-			<option value="XL">XL</option>
+			{% for size in sizes %}
+				{% if forloop.first %}
+					<option value="{{ size }}" selected>{{ size }}</option>
+				{% else %}
+					<option value="{{ size }}">{{ size }}</option>
+				{% endif %}
+			{% empty %}
+				<option value="">No sizes available</option>
+			{% endfor %}
 		</select>
 	</div>
 </div> <!-- row.// -->
@@ -66,8 +76,6 @@
 			<a href="{% url 'cart' %}" class="btn btn-success ml-2"> View Cart </a>
 		</div>
 	{% else %}
-	<form method="post" action="{% url 'add_cart' single_product.id %}">
-		{% csrf_token %}
 		<button type="submit" class="btn  btn-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
 	</form>
 	{% endif %}

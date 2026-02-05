@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_list_or_404, get_object_or_404
-from .models import Product
+from .models import Product, Variation
 from category.models import category
 from carts.models import CartItem
 from carts.views import _cart_id
@@ -40,6 +40,16 @@ def product_detail(request, category_slug, product_slug):
         single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
         # get the cart item for this product (if any) for the current session
         cart_item = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).first()
+        # get all size and color variations for this product
+        product_variations = Variation.objects.filter(product=single_product, is_active=True)
+        print(f"Total variations for {single_product.product_name}: {product_variations.count()}")
+        print(f"All variations: {product_variations.values_list('variation_category', 'variation_value')}")
+        
+        colors = product_variations.filter(variation_category='color').values_list('variation_value', flat=True).distinct()
+        sizes = product_variations.filter(variation_category='size').values_list('variation_value', flat=True).distinct()
+        
+        print(f"Colors: {list(colors)}")
+        print(f"Sizes: {list(sizes)}")
     except Exception as e:
         raise e
     
@@ -47,6 +57,8 @@ def product_detail(request, category_slug, product_slug):
     context = {
         'single_product': single_product,
         'cart_item': cart_item,
+        'colors': colors,
+        'sizes': sizes,
     }
     return render(request, 'store/product_detail.html', context)
 
