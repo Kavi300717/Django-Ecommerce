@@ -48,7 +48,8 @@
 			        <button type="submit" class="btn btn-primary btn-block"> Register  </button>
 			    </div> <!-- form-group// -->      
 			
-                {{ from.erros }}
+                {{ form.errors }}
+                {{ form.non_field_errors }}
 			</form>
 
 		</article><!-- card-body.// -->
@@ -59,5 +60,5 @@
 
 
 </section>
-
+ 
 {% endblock content %}
