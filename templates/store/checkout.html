@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section-content padding-y">
+    <div class="container">
+        <div class="card p-4">
+            <h4 class="mb-3">Checkout</h4>
+            <p class="mb-3">Checkout flow is set up. Payment and order placement are the next step.</p>
+            <a href="{% url 'cart' %}" class="btn btn-outline-primary">Back to cart</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

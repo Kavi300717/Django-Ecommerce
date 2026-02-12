@@ -42,14 +42,8 @@ def product_detail(request, category_slug, product_slug):
         cart_item = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).first()
         # get all size and color variations for this product
         product_variations = Variation.objects.filter(product=single_product, is_active=True)
-        print(f"Total variations for {single_product.product_name}: {product_variations.count()}")
-        print(f"All variations: {product_variations.values_list('variation_category', 'variation_value')}")
-        
         colors = product_variations.filter(variation_category='color').values_list('variation_value', flat=True).distinct()
         sizes = product_variations.filter(variation_category='size').values_list('variation_value', flat=True).distinct()
-        
-        print(f"Colors: {list(colors)}")
-        print(f"Sizes: {list(sizes)}")
     except Exception as e:
         raise e
     
@@ -64,14 +58,19 @@ def product_detail(request, category_slug, product_slug):
 
 
 def search(request):
+    products = Product.objects.none()
+    product_count = 0
+
     if 'keyword' in request.GET:
-        keyword = request.GET['keyword']
+        keyword = request.GET.get('keyword', '').strip()
         if keyword:
-            products = Product.objects.order_by('-created_date').filter(Q(description__icontains=keyword) | Q(product_name__icontains=keyword))
+            products = Product.objects.order_by('-created_date').filter(
+                Q(description__icontains=keyword) | Q(product_name__icontains=keyword)
+            )
             product_count = products.count()
-        context = {
-            'products': products,
-            'product_count': product_count,
-        }    
-        
+
+    context = {
+        'products': products,
+        'product_count': product_count,
+    }
     return render(request, 'store/store.html', context)
